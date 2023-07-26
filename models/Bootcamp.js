@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slugify = require('slugify')
+
 const BootcampSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -55,7 +57,7 @@ const BootcampSchema = new mongoose.Schema({
         min: [1, 'Rating must be at least 1'],
         max: [20, 'Rating must can not be more than 20']
     },
-    averageCost:  Number,
+    averageCost: Number,
     photo: {
         type: String,
         default: 'no-photo.jpg'
@@ -80,6 +82,13 @@ const BootcampSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+})
+
+BootcampSchema.pre('save', function (next) {
+    console.log('\n type of this :- ', typeof this.name);
+    this.slug = slugify(this.name, { lower: true })
+    console.log("this :- ",this);
+    next()
 })
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema)
