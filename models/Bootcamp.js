@@ -82,6 +82,9 @@ const BootcampSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    salary: {
+        type: Number
+    }
 })
 
 BootcampSchema.pre('save', function (next) {
