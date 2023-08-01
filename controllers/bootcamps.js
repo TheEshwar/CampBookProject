@@ -1,41 +1,45 @@
 const ErrorResponse = require('../utils/errorResponse')
 const Bootcamp = require('../models/Bootcamp')
 const asyncHandler = require('../middleware/async')
-const { query } = require('express')
 
 // @desc    Get all bootcamps
 // @routes  GET /api/v1/bootcamps
 // @access  Public
-exports.getBootcamps = asyncHandler(async (req, res, next) => {    
+exports.getBootcamps = asyncHandler(async (req, res, next) => {
     // Copy req.query
     const reqQuery = { ...req.query }
 
     // Field of exclude
-    const removeFields = ['select']
+    const removeFields = ['select', 'sort']
 
     // Loop over removeFields and delete them from reqQuery
     removeFields.forEach(params => delete reqQuery[params])
-    
+
     // Create query String
     let queryStr = JSON.stringify(reqQuery)
 
     // Create operators ($gt, $gte, etc)
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`)
-    
-    console.log(queryStr);
+
     let query = Bootcamp.find(JSON.parse(queryStr))
-    
+
     // Select Fields
-    if(req.query.select)
-    {
+    if (req.query.select) {
         const fields = req.query.select.split(',').join(' ')
-        console.log('fields :- ', fields);
-        
         query = query.select(fields)
     }
-    const bootcamps = await Bootcamp.find(query)
-    
+
+    // Sort
+    if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(' ')
+        query = query.sort(sortBy)
+    }
+    else {
+        query = query.sort('-id')
+    }
+
     // Finding resource and Executing query
+    const bootcamps = await Bootcamp.find(query)
 
     res.status(200).json({ success: true, count: bootcamps.length, data: bootcamps })
 })
