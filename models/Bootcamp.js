@@ -50,7 +50,6 @@ const BootcampSchema = new mongoose.Schema({
     },
     careers: {
         type: Object,
-        required: true
     },
     averageRating: {
         type: Number,
@@ -85,13 +84,30 @@ const BootcampSchema = new mongoose.Schema({
     salary: {
         type: Number
     }
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 })
 
 BootcampSchema.pre('save', function (next) {
-    console.log('\n type of this :- ', typeof this.name);
     this.slug = slugify(this.name, { lower: true })
-    console.log("this :- ",this);
+    console.log("this :- ", this);
     next()
+})
+
+// Cascade delete courses when a bootcamp is deleted
+BootcampSchema.pre('remove', async function(next){
+    console.log(`Courses being removed from bootcamp :- ${this._id}`);
+    await this.model('Course').deleteMany({bootcamp: this._id})
+    next()
+})
+
+// Reverse populate with virtuals
+BootcampSchema.virtual('courses',{
+    ref: 'Course',
+    localField: '_id',
+    foreignField: 'bootcamp',
+    justOne: false
 })
 
 module.exports = mongoose.model('Bootcamp', BootcampSchema)
