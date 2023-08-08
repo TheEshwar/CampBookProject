@@ -1,18 +1,24 @@
+// Packages
 const path = require('path')
 const express = require("express")
 const app = express()
 const dotenv = require("dotenv")
-dotenv.config({ path: './config/config.env' })
-const bootcamps = require('./routes/bootcamps')
-const courses = require('./routes/courses')
-const logger = require('./middleware/logger')
 const morgan = require('morgan')
-const connectDB = require('./config/db')
 const colors = require('colors')
-const errorHandler = require('./middleware/error')
-
 const fileupload = require('express-fileupload')
 
+// Routes
+const bootcamps = require('./routes/bootcamps')
+const courses = require('./routes/courses')
+const auth = require('./routes/auth')
+
+// Middleware
+const logger = require('./middleware/logger')
+const errorHandler = require('./middleware/error')
+
+// Configuration
+const connectDB = require('./config/db')
+dotenv.config({ path: './config/config.env' })
 connectDB()
 
 const PORT = process.env.PORT || 5000
@@ -34,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 // Mount routes
 app.use('/api/v1/bootcamps', bootcamps)
 app.use('/api/v1/courses', courses)
+app.use('/api/v1/auth', auth)
 
 app.use(errorHandler)
 
