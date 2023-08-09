@@ -91,13 +91,11 @@ const BootcampSchema = new mongoose.Schema({
 
 BootcampSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true })
-    console.log("this :- ", this);
     next()
 })
 
 // Cascade delete courses when a bootcamp is deleted
 BootcampSchema.pre('remove', async function(next){
-    console.log(`Courses being removed from bootcamp :- ${this._id}`);
     await this.model('Course').deleteMany({bootcamp: this._id})
     next()
 })
