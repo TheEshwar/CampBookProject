@@ -83,6 +83,11 @@ const BootcampSchema = new mongoose.Schema({
     },
     salary: {
         type: Number
+    },
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: true
     }
 }, {
     toJSON: { virtuals: true },
