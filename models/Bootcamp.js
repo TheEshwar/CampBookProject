@@ -100,7 +100,14 @@ BootcampSchema.pre('save', function (next) {
 })
 
 // Cascade delete courses when a bootcamp is deleted
-BootcampSchema.pre('remove', async function(next){
+BootcampSchema.pre('deleteMany', async function(next){
+    console.log('\n 104 hello');
+
+    // Make sure user is bootcamp user
+    if (bootcamp.user.toString() !== req.user.id && req.user.role != 'admin') {
+        console.log('\n78 hello \n');
+        return next(new ErrorResponse(`User ${req.params.id} is not authorized to delete this bootcamp`, 401))
+    }
     await this.model('Course').deleteMany({bootcamp: this._id})
     next()
 })

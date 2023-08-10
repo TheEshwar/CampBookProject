@@ -30,15 +30,15 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
     req.body.user = req.user.id
 
     // Check for published bootcamp
-    const publishedBootcamp = await Bootcamp.findOne({user: req.user.id})
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id })
 
     // If user is not admin, they can only add one bootcamp - condition to add bootcamp
-    if(publishedBootcamp && req.user.role !== 'admin'){
+    if (publishedBootcamp && req.user.role !== 'admin') {
         return next(new ErrorResponse(`The user with ID ${req.user.id} has already published a bootcamp`, 400))
     }
 
     const bootcamp = await Bootcamp.create(req.body)
-    
+
     res.status(201).json({
         success: true,
         data: bootcamp
@@ -56,7 +56,7 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404))
 
     // Make sure user is bootcamp user
-    if(bootcamp.user.toString() !== req.user.id && req.user.role != 'admin'){
+    if (bootcamp.user.toString() !== req.user.id && req.user.role != 'admin') {
         return next(new ErrorResponse(`User ${req.params.id} is not authorized to update this bootcamp`, 401))
     }
 
@@ -73,6 +73,12 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.deleteBootcamp = async (req, res, next) => {
     try {
+        // Make sure user is bootcamp user
+        if (bootcamp.user.toString() !== req.user.id && req.user.role != 'admin') {
+            console.log('\n78 hello \n');
+            return next(new ErrorResponse(`User ${req.params.id} is not authorized to delete this bootcamp`, 401))
+        }
+
         const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id)
 
         if (!bootcamp)
@@ -81,6 +87,7 @@ exports.deleteBootcamp = async (req, res, next) => {
         res.status(200).json({ success: true, data: {} })
     }
     catch (err) {
+        console.log('\n 90 error in catch :- \n ', err);
         res.status(400).json({ success: false })
     }
 }
