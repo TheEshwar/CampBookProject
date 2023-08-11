@@ -1,82 +1,82 @@
 const advancedResults = (model, populate) => async (req, res, next) => {
 
-     // Copy req.query
-     const reqQuery = { ...req.query }
+    // Copy req.query
+    const reqQuery = { ...req.query }
 
-     // Field of exclude
-     const removeFields = ['select', 'sort', 'page', 'limit']
- 
-     // Loop over removeFields and delete them from reqQuery
-     removeFields.forEach(params => delete reqQuery[params])
- 
-     // Create query String
-     let queryStr = JSON.stringify(reqQuery)
- 
-     // Create operators ($gt, $gte, etc)
-     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`)
- 
-     // Populate with all fields
-     let query = model.find(JSON.parse(queryStr))
- 
-     // // Populate with 
-     // let query = Bootcamp.find(JSON.parse(queryStr)).populate('courses')
- 
-     // Select Fields
-     if (req.query.select) {
-         const fields = req.query.select.split(',').join(' ')
-         query = query.select(fields)
-     }
- 
-     // Sort
-     if (req.query.sort) {
-         const sortBy = req.query.sort.split(',').join(' ')
-         query = query.sort(sortBy)
-     }
-     else {
-         query = query.sort('-id')
-     }
- 
-     // Page and limit
-     const page = parseInt(req.query.page, 10) || 1
-     const limit = parseInt(req.query.limit, 10) || 25
-     const startIndex = (page - 1) * limit
-     const endIndex = page * limit;
-     const total = await model.countDocuments()
- 
-     query = query.skip(startIndex).limit(limit)
+    // Field of exclude
+    const removeFields = ['select', 'sort', 'page', 'limit']
 
-     if(populate){
+    // Loop over removeFields and delete them from reqQuery
+    removeFields.forEach(params => delete reqQuery[params])
+
+    // Create query String
+    let queryStr = JSON.stringify(reqQuery)
+
+    // Create operators ($gt, $gte, etc)
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`)
+
+    // Populate with all fields
+    let query = model.find(JSON.parse(queryStr))
+
+    // // Populate with 
+    // let query = Bootcamp.find(JSON.parse(queryStr)).populate('courses')
+
+    // Select Fields
+    if (req.query.select) {
+        const fields = req.query.select.split(',').join(' ')
+        query = query.select(fields)
+    }
+
+    // Sort
+    if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(' ')
+        query = query.sort(sortBy)
+    }
+    else {
+        query = query.sort('-id')
+    }
+
+    // Page and limit
+    const page = parseInt(req.query.page, 10) || 1
+    const limit = parseInt(req.query.limit, 10) || 25
+    const startIndex = (page - 1) * limit
+    const endIndex = page * limit;
+    const total = await model.countDocuments()
+
+    query = query.skip(startIndex).limit(limit)
+
+    if (populate) {
         query = query.populate(populate)
-     }
- 
-     // Finding resource and Executing query
-     const results = await query
- 
-     // pagination result
-     const pagination = {}
- 
-     if (endIndex < total) {
-         pagination.next = {
-             page: page + 1,
-             limit
-         }
-     }
- 
-     if (startIndex > 0) {
-         pagination.prev = {
-             page: page - 1,
-             limit
-         }
-     }
+    }
 
-     res.advancedResults = {
+    // Finding resource and Executing query
+    const results = await query
+
+    // pagination result
+    const pagination = {}
+
+    if (endIndex < total) {
+        pagination.next = {
+            page: page + 1,
+            limit
+        }
+    }
+
+    if (startIndex > 0) {
+        pagination.prev = {
+            page: page - 1,
+            limit
+        }
+    }
+
+    res.advancedResults = {
         success: true,
         count: results.length,
         pagination,
         data: results
-     }
+    }
 
-     next()
+    next()
 }
 
 module.exports = advancedResults
